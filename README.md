@@ -1,16 +1,29 @@
-# Crazyflie Android client
+Drone-Controller-App
 
-The Crazyflie Android client can be used to control the Crazyflie micro quadcopter from an Android device.
-Connection is established using either the Crazyradio USB dongle or over Bluetooth LE (Crazyflie 2.0 only).
+An Android application built in Java to control or fly a drone using Wi-Fi (UDP communication).
 
-The Crazyflie Android client app is available in the Google Play store:  
-https://play.google.com/store/apps/details?id=se.bitcraze.crazyfliecontrol2
+The app allows users to send flight commands to the drone directly from a mobile device. It includes features like joystick-based movement, mode switches, and real-time feedback from the drone.
 
-More information:
+The user interface (UI) is designed using XML layouts, making it responsive across all screen sizes and providing a clean, user-friendly experience.
 
- - [Crazyflie Android client user guide](http://wiki.bitcraze.se/doc:crazyflie:client:cfandroid:index)
- - [Crazyflie Android client development guide](http://wiki.bitcraze.se/doc:crazyflie:dev:env:android)
+✨ Key Features
 
-## Contributions
+Control the drone using Wi-Fi (UDP protocol)
 
-Please check the contribution guide in [CONTRIBUTING.md](https://github.com/bitcraze/crazyflie-android-client/blob/master/CONTRIBUTING.md).
+Joystick-based navigation
+
+Arm/disarm and mode toggle buttons
+
+Real-time feedback display
+
+Responsive and adaptive UI for all screen sizes
+
+🧰 Tech Stack
+
+Language: Java
+
+UI Design: XML Layouts
+
+Communication: UDP Sockets
+
+Platform: Android Studio

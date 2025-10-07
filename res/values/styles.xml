@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base App Theme -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#3EC2FC</item>
+        <item name="colorPrimaryDark">#99acc1</item>
+        <item name="colorAccent">#FF4081</item>
+    </style>
+
+    <!-- Light Theme -->
+    <style name="AppTheme.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:background">#FFFFFF</item>
+    </style>
+    <style name="TransparentDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <!-- Dark Theme -->
+    <style name="AppTheme.Dark" parent="Theme.AppCompat">
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:background">#000000</item>
+    </style>
+
+
+    <!-- LIGHT THEME -->
+    <style name="LightDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:buttonStyle">@style/DialogButton_Light
+        </item> <!-- custom button style -->
+    </style>
+
+
+    <style name="DarkDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">#2B2B2B</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:buttonStyle">@style/DialogButton_Dark</item>
+    </style>
+
+
+    <!--    <style name="DialogButton_Light" parent="Widget.AppCompat.Button">-->
+    <!--        <item name="android:background">#ffffff</item> &lt;!&ndash; solid color background &ndash;&gt;-->
+    <!--        <item name="android:textColor">#ffffff</item>-->
+    <!--    </style>-->
+
+    <!--    <style name="DialogButton_Dark" parent="Widget.AppCompat.Button">-->
+    <!--        <item name="android:background">#FF5722</item> &lt;!&ndash; another solid color &ndash;&gt;-->
+    <!--        <item name="android:textColor">#FFFFFF</item>-->
+    <!--    </style>-->
+
+    <!-- styles.xml -->
+    <style name="DialogButton_Light" parent="Widget.AppCompat.Button">
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:textColor">#000000</item> <!-- Make text black -->
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+
+    <style name="DialogButton_Dark" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="backgroundTint">#FF5722</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="Widget.AppTheme.MyView" parent="">
+        <item name="android:background">@color/gray_400</item>
+        <item name="exampleColor">@color/light_blue_400</item>
+    </style>
+
+
+</resources>

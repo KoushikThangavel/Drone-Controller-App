@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.YourAppName.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- ✅ Correctly scoped dialog background color -->
+        <item name="dialogBackgroundColor">#1F1F1F</item>
+    </style>
+</resources>

@@ -1,0 +1,152 @@
+    #include <WiFi.h>
+    #include <WiFiUDP.h>
+    #include "esp_camera.h"
+
+    // SoftAP credentials
+    const char* ssid = "ARIS";
+    const char* password = "12345678";
+
+    // Set this to your Android device's IP address on the Wi-Fi network
+    IPAddress mobileIP(192, 168, 43, 50);
+    const uint16_t udpPort = 4210;
+    WiFiUDP udp;
+
+    // Max UDP payload (allows for 6-byte header)
+    const size_t MAX_PAYLOAD = 500;
+
+    // ESP32-CAM AI-Thinker pinout
+    #define PWDN_GPIO_NUM    32
+    #define RESET_GPIO_NUM   -1
+    #define XCLK_GPIO_NUM     0
+    #define SIOD_GPIO_NUM    26
+    #define SIOC_GPIO_NUM    27
+    #define Y9_GPIO_NUM      35
+    #define Y8_GPIO_NUM      34
+    #define Y7_GPIO_NUM      39
+    #define Y6_GPIO_NUM      36
+    #define Y5_GPIO_NUM      21
+    #define Y4_GPIO_NUM      19
+    #define Y3_GPIO_NUM      18
+    #define Y2_GPIO_NUM       5
+    #define VSYNC_GPIO_NUM   25
+    #define HREF_GPIO_NUM    23
+    #define PCLK_GPIO_NUM    22
+
+    void setupCamera() {
+      camera_config_t config;
+      config.ledc_channel = LEDC_CHANNEL_0;
+      config.ledc_timer   = LEDC_TIMER_0;
+      config.pin_d0       = Y2_GPIO_NUM;
+      config.pin_d1       = Y3_GPIO_NUM;
+      config.pin_d2       = Y4_GPIO_NUM;
+      config.pin_d3       = Y5_GPIO_NUM;
+      config.pin_d4       = Y6_GPIO_NUM;
+      config.pin_d5       = Y7_GPIO_NUM;
+      config.pin_d6       = Y8_GPIO_NUM;
+      config.pin_d7       = Y9_GPIO_NUM;
+      config.pin_xclk     = XCLK_GPIO_NUM;
+      config.pin_pclk     = PCLK_GPIO_NUM;
+      config.pin_vsync    = VSYNC_GPIO_NUM;
+      config.pin_href     = HREF_GPIO_NUM;
+      config.pin_sscb_sda = SIOD_GPIO_NUM;
+      config.pin_sscb_scl = SIOC_GPIO_NUM;
+      config.pin_pwdn     = PWDN_GPIO_NUM;
+      config.pin_reset    = RESET_GPIO_NUM;
+      config.xclk_freq_hz = 20000000;
+      config.pixel_format = PIXFORMAT_JPEG;
+
+      if(psramFound()) {
+        config.frame_size = FRAMESIZE_VGA; // 640x480 (480p)
+        config.jpeg_quality = 12;
+        config.fb_count = 2;
+      } else {
+        config.frame_size = FRAMESIZE_VGA;
+        config.jpeg_quality = 12;
+        config.fb_count = 1;
+      }
+
+      esp_err_t err = esp_camera_init(&config);
+      if (err != ESP_OK) {
+        Serial.printf("Camera init failed: 0x%x\n", err);
+        while (true);
+      }
+      Serial.println("Camera initialized.");
+
+      // -------- SHARPNESS ADJUSTMENT --------
+      sensor_t * s = esp_camera_sensor_get();
+      s->set_sharpness(s, 2); // -2 (minimum, soft), 0 (default), 2 (maximum sharpness)
+      // Optional tweaks (uncomment if you want to try):
+       //s->set_contrast(s, 2);   // -2 to 2
+       //s->set_brightness(s, 1); // -2 to 2
+       //s->set_saturation(s, 1); // -2 to 2
+    }
+
+    void setup() {
+      Serial.begin(115200);
+      delay(1000);
+
+      setupCamera();
+
+      // Set static IP for ESP32
+      IPAddress local_IP(192, 168, 43, 42);
+      IPAddress gateway(192, 168, 43, 1);
+      IPAddress subnet(255, 255, 255, 0);
+
+      if (!WiFi.config(local_IP, gateway, subnet)) {
+        Serial.println("Static IP config failed.");
+      }
+
+      WiFi.begin(ssid, password);
+      Serial.println("Connecting to Wi-Fi...");
+      while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+      }
+
+      Serial.println("\nWi-Fi connected!");
+      Serial.print("ESP32 IP address: ");
+      Serial.println(WiFi.localIP());
+
+      udp.begin(udpPort);
+      Serial.print("Ready to stream to Android device at IP: ");
+      Serial.println(mobileIP);
+    }
+
+    void loop() {
+      static uint16_t frameID = 0;
+
+      camera_fb_t* fb = esp_camera_fb_get();
+      if (!fb) {
+        Serial.println("Camera capture failed");
+        return;
+      }
+
+      // Increment frameID for each frame, wrap at 65535
+      frameID = (frameID + 1) & 0xFFFF;
+
+      // Calculate how many packets needed
+      uint16_t totalPackets = (fb->len + MAX_PAYLOAD - 1) / MAX_PAYLOAD;
+
+      for (uint16_t pktID = 0, offset = 0; pktID < totalPackets; pktID++, offset += MAX_PAYLOAD) {
+        size_t packetDataSize = (offset + MAX_PAYLOAD < fb->len) ? MAX_PAYLOAD : (fb->len - offset);
+        uint8_t udpBuf[6 + packetDataSize];
+
+        // HEADER: frameID (2), pktID (2), totalPackets (2)
+        udpBuf[0] = (frameID >> 8) & 0xFF;
+        udpBuf[1] = frameID & 0xFF;
+        udpBuf[2] = (pktID >> 8) & 0xFF;
+        udpBuf[3] = pktID & 0xFF;
+        udpBuf[4] = (totalPackets >> 8) & 0xFF;
+        udpBuf[5] = totalPackets & 0xFF;
+        memcpy(&udpBuf[6], fb->buf + offset, packetDataSize);
+
+        udp.beginPacket(mobileIP, udpPort);
+        udp.write(udpBuf, 6 + packetDataSize);
+        udp.endPacket();
+
+        delay(2); // Lower for higher FPS, raise if packets drop
+      }
+
+      esp_camera_fb_return(fb);
+      delay(50); // Adjust for desired frame rate (lower for faster, higher for less bandwidth)
+    }

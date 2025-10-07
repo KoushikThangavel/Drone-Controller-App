@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.YourAppName.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">#000000</item> <!-- or splash background -->
+        <item name="dialogBackgroundColor">#FFFFFF</item> <!-- Light background -->
+
+    </style>
+
+</resources>
